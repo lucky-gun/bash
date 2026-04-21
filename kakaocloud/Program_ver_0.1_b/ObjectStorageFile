@@ -1,0 +1,193 @@
+objectStorageServer="https://objectstorage.kr-central-1.kakaoi.io/v1_ext/bucket"
+apitokenserver="https://iam.kakaoi.io/identity/v3/auth/tokens"
+
+Api_Menu_Func(){
+	echo "       어떤 API 작업을 원하시나요?\n"
+	Text_Show Api_Menu_Text 0
+	Menu_Select
+	M_Bar
+	case $select in
+		1) API_key_Check;;
+		2) Text_Show Answer_Text 9;;
+		*) Text_Show Answer_Text 2;;
+	esac
+}
+API_key_Check(){
+	if [ -z "$Accesskey" ] || [ -z "$Hiddenkey" ]
+	then
+		echo "       죄송합니다.\n       현재 스크립트 상으로는 사용자키가 준비되어 있지 않습니다.\n"
+		echo "       사용자키를 임시 등록하시겠습니까?\n"
+		echo "       1. 임시 등록\n       2. 임시 등록 X\n"
+		Menu_Select
+		M_Bar
+		case $select in
+			1) echo "       사용자키 임시 등록을 진행합니다.\n"
+				echo "       KIC 사용자 설정의 사용자 액세스 키 ID를 입력해주세요."
+				read Accesskey
+				echo "       KIC 사용자 설정의 사용자 보안 키를 입력해주세요. "
+				read Hiddenkey
+				M_Bar
+				echo "       확인중입니다. 잠시만 기다려주세요\n";;
+			2) Text_Show Answer_Text 4
+				Text_Show Answer_Text 5
+				exit 0;;
+			*) Text_Show Answer_Text 2
+				exit 0;;
+		esac
+	else
+		echo "       스크립트 상으로 사용자키가 등록되어 있어 자동으로 발급되어집니다.\n"
+	fi
+	sleep 1
+	curl -v -X POST $apitokenserver -H 'Content-type: application/json' --data '{ "auth": { "identity": { "methods": [ "application_credential" ], "application_credential": { "id": "'"${Accesskey}"'","secret":"'"${Hiddenkey}"'"}}}}' 2>&1 | grep x-subject-token
+	if [ $? -eq 0 ]
+	then
+		Text_Show Answer_Text 10
+		echo "       토큰을 복사부탁드립니다.\n"
+	else
+		Text_Show Answer_Text 7
+	fi
+}
+Token_Check(){
+	if [ -z "$token"  ]
+	then
+		echo "       죄송합니다.\n       현재 스크립트 상으로는 토큰이 준비되어 있지 않습니다.\n"
+		echo "       토큰을 임시 등록하시겠습니까?\n"
+		echo "       1. 임시 등록\n       2. 임시 등록 X\n"
+		Menu_Select
+		M_Bar
+		case $select in
+			1) echo "토큰 임시 등록을 진행합니다.\n"
+				echo "임시로 등록하기 위한 토큰값을 입력해주세요"
+				read token
+				echo "토큰 입력이 완료되었습니다. 감사합니다.";;
+			2) Text_Show Answer_Text 4
+				Text_Show Answer_Text 5
+				exit 0;;
+			*) Text_Show Answer_Text 2
+				exit 0;;
+		esac
+	fi
+	sleep 1
+	M_Bar
+	Os_Menu_Func
+}
+## ObjectStorage 작업 분기점
+Os_Menu_Func(){
+	echo "        < Object Storage 작업 선택 >\n"
+	Text_Show Menu_OS_Work_Text 0
+	Menu_Select
+	case $select in
+		1) Bucket_make_func;;
+		2) Bucket_lookup_func;;
+		3) Bucket_delete_func;;
+		#4) Folder_make_func;;
+		#5) Object_lookup_func;;
+		#6) Object_upload_func;;
+		#7) Object_download_func;;
+		#8) Object_delete_func;;
+		4|5|6|7|8) M_Bar
+			Text_Show Answer_Text 9;;
+		*) M_Bar
+			Text_Show Answer_Text 2;;
+	esac
+}
+
+# OS Bucket 만들기
+Bucket_make_func(){
+	M_Bar
+	echo "       Bucket 생성을 시작합니다."
+	echo "       먼저 Bucket의 Type을 정해주세요\n"
+	echo "       1. HOT\n       2. Cold (지원예정)\n"
+	Menu_Select
+	M_Bar
+	case $select in
+		1) bucketType="hot";;
+		2) bucketType="cold";;
+		*) Text_Show Answer_Text 2
+			exit 0;;
+	esac
+	echo "       암호화를 하시겠습니까?(대문자 x)"
+	echo "       y. Encrypt\n       n. Decrypt\n"
+	Menu_Select
+	M_Bar
+	case $select in
+		y) encryption="true";;
+		n) encryption="false";;
+		*) Text_Show Answer_Text 2
+			exit 0;;
+	esac
+	M_Bar
+	echo "       버킷의 이름을 설정해주세요.(무조건 넣어주세요)(중복확인은 아직 불가)"
+	echo "       영어, 숫자, 대시(-)를 입력해 주세요. (4~40자)(대문자 불가능)\n"
+	read bucketName
+	M_Bar
+	echo "버킷 생성중입니다. 잠시만 기다려주세요\n"
+	sleep 1
+	curl --location --request PUT ''$objectStorageServer'' --header 'X-Auth-Token:'$token'' --header 'Content-Type: application/json' --data-raw '{ "name": "'"$bucketName"'", "type": "'"$bucketType"'","use_encryption":'$encryption'}' | jq -r
+	if [ $? == 0 ]
+	then
+		Text_Show Answer_Text 10
+	else
+		Text_Show Answer_Text 7
+	fi
+}
+
+#OS Bucket 조회
+Bucket_lookup_func(){
+	M_Bar
+	echo "       Bucket 조회를 시작합니다."
+	echo "       먼저 현재 존재하고 있는 Bucket 목록을 조회합니다. (최대 50개)\n"
+	sleep 1
+	M_Bar
+	curl --location --request GET ''$objectStorageServer'?limit=50' --header 'X-Auth-Token:'$token'' | jq -r .items | grep name
+	if [ $? != 0 ]
+	then
+		Text_Show Answer_Text 7
+		exit 0
+	fi
+	echo "\n       상세 정보 조회를 하고 싶은 Bucket를 입력해주세요.(이메일 주소 X)"
+	read bucketName
+	M_Bar
+	sleep 1
+	curl --location --request GET ''$objectStorageServer'/'$bucketName'' --header 'X-Auth-Token:'$token'' | jq -r
+	if [ $? == 0 ]
+	then
+		Text_Show Answer_Text 6
+	else
+		Text_Show Answer_Text 8
+	fi
+}
+
+#OS Bucket 삭제
+Bucket_delete_func(){
+	M_Bar
+	echo "       Bucket 삭제를 시작합니다. (신중하게 생각해주세요)"
+	echo "       먼저 현재 존재하고 있는 Bucket 목록을 조회합니다. (최대 50개)\n\n"
+	curl --location --request GET ''$objectStorageServer'?limit=50' --header 'X-Auth-Token:'$token'' | jq -r .items | grep name
+	if [ $? != 0 ]
+	then
+		echo "\n"
+		Text_Show Answer_Text 7
+		exit 0
+	fi
+	echo "\n       삭제를 하고 싶은 Bucket를 입력해주세요.(이메일 주소 X)"
+	read bucketName
+	M_Bar
+	echo "       정말로 삭제하시겠습니까? 복구가 불가합니다. (대문자 x)\n"
+	echo "       y. 삭제\n       n. 삭제안함\n"
+	Menu_Select
+	M_Bar
+	case $select in
+		y) echo "       버킷 삭제가 진행중입니다. 잠시만 기다려주세요"
+			sleep 1
+			curl --location --request DELETE ''$objectStorageServer'/'$bucketName'' --header 'X-Auth-Token:'$token''
+			if [ $? == 0 ]
+			then
+				Text_Show Answer_Text 10
+			else
+				Text_Show Answer_Text 8
+			fi;;
+		n) echo "       버킷 삭제를 중단하였습니다. 프로그램을 종료합니다.";;
+		*) Text_Show Answer_Text 2;;
+	esac
+}

@@ -1,0 +1,27 @@
+# ------ 배너 -----
+Menu_Bar(){
+	clear
+	echo "###### GATEWAY < Cloud Connection > #######\n" #본인 마음에 드는것으로 변경 가능
+}
+
+# ------ Kakao Cloud ------
+vm_kic_dir_name=(
+tester
+check
+)
+
+vm_kic_dir_db=(
+210.109.14.217 rocky
+61.109.237.165 rocky
+)
+
+vm_kic_indir_name=(
+worker1
+)
+
+vm_kic_indir_db=(
+10.0.1.223 rocky check
+)
+#ip user dir_name
+
+privatekey=/Users/lucas.1004/Desktop/sshgate/pem/TechCS.pem

@@ -1,0 +1,23 @@
+# ----- DB 정의 (사전정의) 건드릴 필요 x ----
+
+Cloud_Select_Text=(
+'Oracle Cloud'
+'Kakao i Cloud'
+)
+
+Menu_Work_Text=(
+'종료'
+'SSH'
+)
+
+Answer_Text=(
+'프로그램을 종료합니다. 수고하세요!'
+'잘못된 입력입니다. 죄송합니다'
+'해당 VM에 접속 중입니다. 잠시만 기다려주세요.'
+'접속에 오류가 발생하였습니다. 죄송합니다.'
+)
+
+Vm_Type_Text=(
+'직접 접근 가능'
+'GateWay 통해 접근'
+)

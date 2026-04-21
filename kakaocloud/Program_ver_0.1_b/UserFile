@@ -1,0 +1,56 @@
+# ------ 배너 ------- #본인 마음에 드는것으로 변경 가능
+M_Bar(){
+	clear
+	echo "⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘"
+	echo "⌘⌘⌘⌘⌘⌘⌘⌘⌘ Tech CS Program ver Alpha ⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘"
+	echo "⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘⌘\n"
+}
+
+
+# ------ DB 파일 ------
+DB=(
+vm_kic_dir_name 1        # vm 갯수만큼 숫자 변경 (본인걸로)
+vm_kic_indir_name 1
+
+# ------ ↓ 아래파일은 건들 필요 x -----
+Menu_Work_Text 7
+Answer_Text 8
+Vm_Type_Text 2
+Menu_OS_Work_Text 8
+Api_Menu_Text 2
+)
+
+
+# ------ Kakao i Cloud ------ (무조건 본인걸로 수정)
+
+privatekey=/Users/lucas.1004/Desktop/sshgate/pem/TechCS.pem #본인 내부 VM용 Key
+
+# 직접 접근 가능한 VM들
+
+vm_kic_dir_name=(
+vm-lucas-final
+)
+
+# 직접 접근 ip / user / pem파일 위치
+
+vm_kic_dir_db=(
+1.1.1.1 ubuntu privatekey
+)
+
+# 직접 접근이 불가능한 VM들
+
+vm_kic_indir_name=(
+vm-lucas-project
+)
+
+# 사설 ip / user / 통과해야하는 gateway or 직접접근 vm 이름
+# 단, 반드시 privatekey은 입력해야합니다.
+
+vm_kic_indir_db=(
+1.1.1.1 ubuntu vm-lucas-final
+)
+
+#변수선언 ( ex) token="abc", Aceesskey, Hiddenkey) ↓ 아래에다가 적으면 적용됨
+token=""
+Accesskey=""
+Hiddenkey=""

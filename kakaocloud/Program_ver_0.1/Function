@@ -1,0 +1,176 @@
+source ./Program/TextFile
+source ./Program/UserFile
+
+## 작업 분기점
+Menu_Bifuraction(){
+	M_Bar
+	echo "       어떤 작업을 원하시나요?\n"
+	Text_Show Menu_Work_Text 0
+	Menu_Select
+	M_Bar
+	case $select in
+		1) Text_Show Answer_Text 1;;
+		2) Ssh_Connect;;
+		*) Text_Show Answer_Text 2;;
+	esac
+}
+
+## ssh 접속 연결
+Ssh_Connect(){
+	echo "       접속하기 위한 Cloud를 선택해주세요. \n"
+	Text_Show Cloud_Select_Text 0
+	Menu_Select
+	M_Bar
+	case $select in
+		1) Oracle_Connect;;
+		2) Ssh_Func;;
+		*) Text_Show Answer_Text 2;;
+	esac
+}
+##직접적 연결
+KIC_Connect(){
+	echo "       VM 접속 방법을 선택해주세요.\n"
+	Text_Show Vm_Type_Text 0
+	Menu_Select
+	M_Bar
+	echo "       작업하기 위한 VM를 선택해주세요.\n"
+	echo "             < VM 목록 >\n"
+	case $select in
+		1) Text_Show vm_kic_dir_name 0
+			type=1;;
+		2) Text_Show vm_kic_indir_name 0
+			type=2;;
+		*) M_Bar
+			Text_Show Answer_Text 2
+			exit 0;;
+	esac
+	Menu_Select
+	M_Bar
+	if [[ $select =~ ^[0-9]+$ ]]
+	then
+		if (( $type == 1 && $select <= ${#vm_kic_dir_name[@]} ))
+		then
+			dirip=${vm_kic_dir_db[$select*3-3]}
+			dirUser=${vm_kic_dir_db[$select*3-2]}
+			Privatekey_Check $select
+		elif (( $type == 2 && $select <= ${#vm_kic_indir_name[@]} ))
+		then
+			indirip=${vm_kic_indir_db[$select*3-3]}
+			indirUser=${vm_kic_indir_db[$select*3-2]}
+			indirpemfile=$privatekey
+			## 변수선언
+			place=0
+			while [ ${vm_kic_dir_name[$place]} != ${vm_kic_indir_db[$select*3-1]} ]
+			do
+				place=$(($place+1))
+			done
+			place=$((place+1))
+			dirip=${vm_kic_dir_db[$place*3-3]}
+			dirUser=${vm_kic_dir_db[$place*3-2]}
+			Privatekey_Check $place
+			echo \ "Host bastion\n  HostName $dirip\n  User $dirUser\n  ForwardAgent yes\n  IdentityFile $dirpemfile\n\nHost staging techcs\n  HostName $indirip\n  User $indirUser\n  IdentityFile $indirpemfile \n  ProxyCommand ssh bastion -W %h:%p" > ~/.ssh/config
+		else
+			M_Bar
+			Text_Show Answer_Text 2
+			exit 0
+		fi
+	else
+		Text_Show Answer_Text 2
+		exit 0
+	fi
+}
+
+Ssh_Func(){
+	M_Bar
+	KIC_Connect
+	clear
+	if [ $type == 1 ]
+	then
+		ssh -i $dirpemfile $dirUser@$dirip
+	else
+		ssh staging
+	fi
+	if [ $? -ne 0 ]
+	then
+		echo "접속에 오류가 발생하였습니다. 죄송합니다."
+	fi
+}
+
+
+Privatekey_Check(){
+	if [ ${vm_kic_dir_db[$1*3-1]} == "privatekey" ]
+	then
+		dirpemfile=$privatekey
+	elif [ ${vm_kic_dir_db[$1*3-1]} == "private2key" ]
+	then
+		dirpemfile=$private2key
+        elif [ ${vm_kic_dir_db[$1*3-1]} == "private3key" ]
+	then
+                dirpemfile=$private3key
+        elif [ ${vm_kic_dir_db[$1*3-1]} == "private4key" ]
+	then
+                dirpemfile=$private4key
+	else
+		dirpemfile=${vm_kic_dir_db[$1*3-1]}
+	fi
+}
+
+Oracle_Connect(){
+	ip=0
+	echo "       접속하기 위한 VM를 선택해주세요. \n"
+	echo "             < VM 목록 >"
+	Text_Show vm_oracle_name 0
+	Menu_Select
+	M_Bar
+	case $select in
+		1|2|3|4) Text_Show Answer_Text 3
+			ip=${vm_oracle_ip[$select-1]};;
+		*) Text_Show Answer_Text 2
+			exit 0;;
+	esac
+	sleep 1
+	clear
+	ssh -i $oraclekey ubuntu@$ip
+	if [ $? -ne 0 ]
+	then
+		echo "접속에 오류가 발생하였습니다. 죄송합니다."
+	fi
+}
+
+
+## 값 입력받기
+Menu_Select(){
+	echo "       값을 입력해주세요 : " ;
+	read select
+}
+
+## 텍스트 보여주기
+Text_Show(){
+
+	## 변수선언
+	TI_place=0
+
+	## 리스트 찾기 (텍스트위치값, 답변갯수 찾기)
+	while [ ${List_DB[$TI_place]} != $1 ]
+	do
+		TI_place=$(($TI_place+1))
+	done
+
+	## 텍스트 보여주기 (0일 경우, 리스트 / 1이상일 경우, 해당 텍스트의 n번째 답변만)
+	if [ $2 == 0 ]
+	then
+		for (( i=0; i< ${List_DB[$TI_place+1]}; i++ )) do
+			eval text=\${${List_DB[$TI_place]}[$i]}
+			echo "       $((i+1)). $text"
+		done
+	else
+		eval text=\${${List_DB[$TI_place]}[$2-1]}
+		echo "       $text"
+	fi
+	echo ""
+}
+
+## 메인함수
+main_Function(){
+	Menu_Bifuraction
+}

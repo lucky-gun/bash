@@ -1,0 +1,88 @@
+source ./Program/UserFile
+
+Main_Function(){
+    Menu_Bar
+    echo "      어떤 작업을 원하시나요?\n"
+    echo "      1. DB Refresh\n"
+    echo "      2. SSH 접속\n"
+    Menu_Select
+    Menu_Bar
+    case $select in
+		1) DB_Refresh;;
+		2) SSh_Connect;;
+		*) echo '잘못된 입력입니다. 죄송합니다';;
+	esac
+}
+
+Menu_Select(){
+	echo "      값을 입력해주세요 : " ;
+	read select
+}
+
+DB_Refresh(){
+    #for i in {0..${#vm_kic_dir_name[@]}}; do
+    eval "rm -rf ~/.ssh/*"
+    echo > ~/.ssh/config
+    for ((i=0; i<${#vm_kic_dir_name[@]}; i++)); do
+        text="${vm_kic_dir_name[$i]}"
+        dirip="${vm_kic_dir_db[$i*2]}"
+        diruser="${vm_kic_dir_db[$i*2+1]}"
+        echo "Host $text\n HostName $dirip\n User $diruser\n IdentityFile $privatekey\n Port 22\n" >> ~/.ssh/config
+    done
+    #ForwardAgent 
+    for ((i=0; i<${#vm_kic_indir_name[@]}; i++)); do
+        text="${vm_kic_indir_name[$i]}"
+        indirip="${vm_kic_indir_db[$i*3]}"
+        indiruser="${vm_kic_indir_db[$i*3+1]}"
+        diruser="${vm_kic_indir_db[$i*3+2]}"
+        echo "Host $text\n HostName $indirip\n User $indiruser\n ProxyJump $diruser\n IdentityFile $privatekey\n Port 22\n" >> ~/.ssh/config
+    done
+    echo "갱신이 완료되었습니다."
+}
+
+SSh_Connect(){
+    echo "      접속을 원하는 VM을 선택해주세요.\n"
+    echo "      [Bastion Host]"
+    bastion_num=${#vm_kic_dir_name[@]}
+    for ((i=0; i<bastion_num; i++)); do
+        text="${vm_kic_dir_name[$i]}"
+        echo "      $((i+1)). $text"
+    done
+    echo "\n      [Internal Host]"
+    internal_num=${#vm_kic_indir_name[@]}
+    for ((i=0; i<internal_num; i++)); do
+        text="${vm_kic_indir_name[$i]}"
+        echo "      $((i+1+bastion_num)). $text"
+    done
+    echo ""
+    Menu_Select
+    Menu_Bar
+    if [[ $select =~ ^[0-9]+$ ]]; then
+        if (( select > 0 && select <= bastion_num )); then
+            Gateway vm_kic_dir_name $((select-1))
+        elif (( select > bastion_num && select <= bastion_num+internal_num )); then
+            Gateway vm_kic_indir_name $((select-bastion_num-1))
+        else
+            echo '잘못된 입력입니다. 죄송합니다'
+            exit 0
+        fi
+    else
+        echo '잘못된 입력입니다. 죄송합니다'
+        exit 0
+    fi
+}
+
+Gateway(){
+    eval "clear"
+    eval "ssh \$(eval \"echo \${$1[$2]}\")"
+    if [ $? -ne 0 ]; then
+        echo "접속에 오류가 발생하였습니다. 죄송합니다."
+    fi
+}
+    #eval "echo \${$1[$2]}"
+#    if [ $1 == "vm_kic_dir_name" ]; then
+#        eval "ssh \$(eval \"echo \${$1[$2]}\")"
+#        if [ $? -ne 0 ]; then
+#		    echo "접속에 오류가 발생하였습니다. 죄송합니다."
+#        fi
+

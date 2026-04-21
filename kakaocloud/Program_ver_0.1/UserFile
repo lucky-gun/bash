@@ -1,0 +1,64 @@
+# ------ 배너 -----
+M_Bar(){
+	clear
+	echo "###### GATEWAY < Cloud Connection > #######\n" #본인 마음에 드는것으로 변경 가능
+}
+
+# DB 파일 / 숫자 : 배열 갯수 (변동 가능)
+List_DB=(
+'vm_oracle_name' 4
+'vm_kic_dir_name' 3
+'vm_kic_indir_name' 0
+
+
+'Cloud_Select_Text' 2
+'Menu_Work_Text' 2
+'Vm_Type_Text' 2
+'Answer_Text' 4
+)
+
+# ------ Oracle Cloud ------
+vm_oracle_name=(
+'MyHome Prod'
+'Wiki Prod'
+'MyHome Test'
+'Wiki Test'
+)
+
+vm_oracle_ip=(
+[ip주소]
+[ip주소]
+111.111.111.1
+111.111.111.1
+)
+
+oraclekey=/Users/lucas.1004/Desktop/sshgate/pem/id_rsa
+
+
+# ------ Kakao i Cloud ------
+
+
+vm_kic_dir_name=(
+BM-kr1
+BM-kr2
+BM-TechCS
+)
+
+
+vm_kic_dir_db=(
+[공인ip] ubuntu private3key
+[공인ip] ubuntu private4key
+[공인ip] ubuntu privatekey
+)
+
+vm_kic_indir_name=(
+)
+
+
+vm_kic_indir_db=(
+)
+
+privatekey=/Users/lucas.1004/Desktop/sshgate/pem/TechCS.pem
+private2key=/Users/lucas.1004/Desktop/sshgate/pem/TechCS_kr1.pem
+private3key=/Users/lucas.1004/Desktop/sshgate/pem/yohan-kic_propose-vm.pem
+private4key=/Users/lucas.1004/Desktop/sshgate/pem/yohan-kic-kr2.pem
