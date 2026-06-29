@@ -9,8 +9,8 @@
 ## 📂 Repository Structure
 
 ### 🧪 Kakaocloud (실습 & 실험)
-| 디렉토리 | 설명 |
-|----------|------|
-| Kakaocloud | 직장 기간 동안 쉽게 업무보기 위해 만든 Bash 쉘 스크립트 (간단한 프로그램) |
-| practice | devops SRE 영역을 키우기 위한 작성한 bash 스크립트 |
+| 디렉토리 | 설명 | URL |
+|----------|------|-----|
+| Kakaocloud | 직장 기간 동안 쉽게 업무보기 위해 만든 Bash 쉘 스크립트 (간단한 프로그램) | [링크](https://lucky-gun.com/2025/12/05/private-bash/)
+| practice | devops SRE 영역을 키우기 위한 작성한 bash 스크립트 | [링크](https://lucky-gun.com/2026/06/25/work-automation/)
 ---
